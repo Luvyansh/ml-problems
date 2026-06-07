@@ -5,6 +5,10 @@ from numpy.typing import NDArray
 class Solution:
 
     def softmax(self, z: NDArray[np.float64]) -> NDArray[np.float64]:
-        n = z - np.max(z)
-        d = np.exp(n)
-        return np.round(d/(np.sum(d)), 4)
+        # z is a 1D NumPy array of logits
+        # Hint: subtract max(z) for numerical stability before computing exp
+        # return np.round(your_answer, 4)
+        z -= np.max(z)
+        np.exp(z, out=z)
+        z /= np.sum(z)
+        return np.round(z, 4)
