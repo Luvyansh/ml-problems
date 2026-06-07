@@ -5,8 +5,7 @@ from numpy.typing import NDArray
 class Solution:
     
     def sigmoid(self, z: NDArray[np.float64]) -> NDArray[np.float64]:
-        z = 1 / (1 + np.exp(-z))
-        return np.round(z, 5)
+        return np.round(1/(1+np.exp(-z)), 5)
 
     def relu(self, z: NDArray[np.float64]) -> NDArray[np.float64]:
         return np.maximum(0, z)
