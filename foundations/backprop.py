@@ -17,4 +17,8 @@ class Solution:
         act = 1/(1+np.exp(-z))
         dl_dw = act * (1-act) *(act-y_true) * x
         dl_db = act * (1-act) *(act-y_true)
-        return (np.round(dl_dw, 5), round(float(dl_db), 5))
+
+        dL_dw = np.round(dl_dw, 5)
+        dL_db = round(float(dl_db), 5)
+
+        return (dL_dw, dL_db)
