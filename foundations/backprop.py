@@ -13,7 +13,7 @@ class Solution:
         # Forward: z = dot(x, w) + b, y_hat = sigmoid(z)
         # Loss: L = 0.5 * (y_hat - y_true)^2
         # Return: (dL_dw rounded to 5 decimals, dL_db rounded to 5 decimals)
-        z = x@w + b
+        z = (x @ w) + b
         act = 1/(1+np.exp(-z))
         dl_dw = act * (1-act) *(act-y_true) * x
         dl_db = act * (1-act) *(act-y_true)
