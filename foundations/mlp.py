@@ -10,15 +10,9 @@ class Solution:
         # biases: list of 1D bias vectors
         # Apply ReLU after each hidden layer, no activation on output layer
         # return np.round(your_answer, 5)
-        h= x
-        num_layers = len(weights)
+        a = x
+        for i in range(len(weights)):
+            z = a @ weights[i] + biases[i]
+            a = np.maximum(0, z)
 
-        for i in range(num_layers):
-            z = np.dot(h,weights[i]) + biases[i]
-
-            if i < num_layers -1 :
-                h = np.maximum(0,z)
-            else:
-                h = z
-
-        return np.round(h,5)
+        return np.round(a,5)
