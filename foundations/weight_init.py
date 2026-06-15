@@ -35,15 +35,17 @@ class Solution:
             if init_type == 'xavier':
                 std = math.sqrt(2.0 / (dims[i] + dims[i + 1]))
             elif init_type == 'kaiming':
-                std = math.sqrt(2.0 / (dims[i]))
+                std = math.sqrt(2.0 / dims[i])
             else:
                 std = 1.0
             w = torch.randn(dims[i + 1], dims[i]) * std
             weights.append(w)
+
         x = torch.randn(1, input_dim)
         stds = []
         for w in weights:
             x = x @ w.T
             x = torch.relu(x)
             stds.append(round(x.std().item(), 2))
+
         return stds
