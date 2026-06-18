@@ -14,21 +14,16 @@ class Solution:
         # Loss: MSE = (1/n) * sum((y_hat - y)^2)
         # Initialize w = zeros, b = 0
         # return (np.round(w, 5), round(b, 5))
-        n = X.shape[0]
-        w = np.zeros(X.shape[1])
+        n, d = X.shape
+        w = np.zeros(d)
         b = 0.0
-        print(X.shape, ";    ", w.shape)
         for _ in range(epochs):
-            y_hat = X @ w + b
+            y_hat = X @ w + b # (n,1)
+            loss = (1/n) * np.sum((y_hat - y)**2)
             
-            error = y_hat - y
+            dw = (2/n) * X.T @ (y_hat - y)
+            db = (2/n) * np.sum(y_hat - y)
 
-            dw = (2/n) * (X.T @ error)
-            db = 2 * np.mean(y_hat - y)
-            
-            w = w - (lr * dw)
-            b = b - (lr * db)
-        print(error)
-        print(np.round(y_hat-y, 5))
-        print(y_hat, "\n\n dw \n\n ", np.round(dw, 5), "\n\n db \n\n", np.round(db, 5))
-        return (np.round(w, 5), round(float(b), 5))
+            w = w - lr * dw
+            b = b - lr * db
+        return (np.round(w, 5), round(b, 5))
