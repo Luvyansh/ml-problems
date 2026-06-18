@@ -30,35 +30,35 @@ class Solution:
         # Forward + backward pass with nn.MSELoss
         # For each nn.Linear layer's weight gradient, record: mean, std, norm
         # Call model.zero_grad() first. Round to 4 decimals.
-        stats = []
         model.zero_grad()
-        criterion = nn.MSELoss()
-        predictions = model(x)
-        loss = criterion(predictions, y)
+        output = model(x)
+        loss = nn.MSELoss()(output, y)
         loss.backward()
-        for layer in model.children():
-            if isinstance(layer, nn.Linear):
-                grad_tensor = layer.weight.grad
-                layer_mean = torch.mean(grad_tensor).item()
-                layer_std = torch.std(grad_tensor).item()
-                layer_norm = torch.norm(grad_tensor).item()
-                
-                stats.append({
-                    'mean': round(layer_mean, 4),
-                    'std': round(layer_std, 4),
-                    'norm': round(layer_norm, 4)
-                })
+        stats = []
+        for module in model.children():
+            if isinstance(module, nn.Linear):
+                grad = module.weight.grad
+                mean_val = round(grad.mean().item(), 4)
+                std_val = round(grad.std().item(), 4)
+                norm_val = round(torch.norm(grad).item(), 4)
+                stats.append({'mean': mean_val, 'std': std_val, 'norm': norm_val})
         return stats
 
     def diagnose(self, activation_stats: List[Dict[str, float]], gradient_stats: List[Dict[str, float]]) -> str:
         # Classify network health based on the stats
         # Return: 'dead_neurons', 'exploding_gradients', 'vanishing_gradients', or 'healthy'
         # Check in priority order (see problem description for thresholds)
-        for i in range(len(activation_stats)):
-            if activation_stats[i]['dead_fraction'] > 0.5:
+        for s in activation_stats:
+            if s['dead_fraction'] > 0.5:
                 return 'dead_neurons'
-            if gradient_stats[i]['norm'] > 1000:
+        for s in gradient_stats:
+            if s['norm'] > 1000:
                 return 'exploding_gradients'
-            if gradient_stats[i]['norm'] < 1e-5:
+        if gradient_stats and gradient_stats[-1]['norm'] < 1e-5:
+            return 'vanishing_gradients'
+        for s in activation_stats:
+            if s['std'] < 0.1:
                 return 'vanishing_gradients'
+            if s['std'] > 10.0:
+                return 'exploding_gradients'
         return 'healthy'
