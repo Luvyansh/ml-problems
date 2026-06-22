@@ -7,16 +7,15 @@ class Solution(nn.Module):
         super().__init__()
         torch.manual_seed(0)
         # Layers: Embedding(vocabulary_size, 16) -> Linear(16, 1) -> Sigmoid
-        self.embed = nn.Embedding(num_embeddings=vocabulary_size, embedding_dim=16)
-        self.linear = nn.Linear(16, 1)
-        self.sigmoid = nn.Sigmoid()
+        self.embedding_layer = nn.Embedding(vocabulary_size, 16)
+        self.linear_layer = nn.Linear(16, 1)
+        self.sigmoid_layer = nn.Sigmoid()
 
     def forward(self, x: TensorType[int]) -> TensorType[float]:
         # Hint: The embedding layer outputs a B, T, embed_dim tensor
         # but you should average it into a B, embed_dim tensor before using the Linear layer
-        x = self.embed(x)
-        x = x.mean(dim=1)
-        x = self.linear(x)
-        x = self.sigmoid(x)
+        embeddings = self.embedding_layer(x)
+        averaged = torch.mean(embeddings, dim=1)
+        projected = self.linear_layer(averaged)
         # Return a B, 1 tensor and round to 4 decimal places
-        return x
+        return torch.round(self.sigmoid_layer(projected), decimals=4)
