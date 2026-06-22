@@ -14,8 +14,8 @@ class Solution(nn.Module):
     def forward(self, x: TensorType[int]) -> TensorType[float]:
         # Hint: The embedding layer outputs a B, T, embed_dim tensor
         # but you should average it into a B, embed_dim tensor before using the Linear layer
+        # Return a B, 1 tensor and round to 4 decimal places
         embeddings = self.embedding_layer(x)
         averaged = torch.mean(embeddings, dim=1)
         projected = self.linear_layer(averaged)
-        # Return a B, 1 tensor and round to 4 decimal places
         return torch.round(self.sigmoid_layer(projected), decimals=4)
