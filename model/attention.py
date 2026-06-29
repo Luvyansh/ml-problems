@@ -9,9 +9,9 @@ class SingleHeadAttention(nn.Module):
         torch.manual_seed(0)
         # Create three linear projections (Key, Query, Value) with bias=False
         # Instantiation order matters for reproducible weights: key, query, value
-        self.key_gen = nn.Linear(embedding_dim, attention_dim, bias=False)
-        self.query_gen = nn.Linear(embedding_dim, attention_dim, bias=False)
-        self.value_gen = nn.Linear(embedding_dim, attention_dim, bias=False)
+        self.key = nn.Linear(embedding_dim, attention_dim, bias=False)
+        self.query = nn.Linear(embedding_dim, attention_dim, bias=False)
+        self.value = nn.Linear(embedding_dim, attention_dim, bias=False)
 
     def forward(self, embedded: TensorType[float]) -> TensorType[float]:
         # 1. Project input through K, Q, V linear layers
@@ -20,20 +20,16 @@ class SingleHeadAttention(nn.Module):
         #    then masked_fill positions where mask == 0 with float('-inf')
         # 4. Apply softmax(dim=2) to masked scores
         # 5. Return (scores @ V) rounded to 4 decimal places
-        # Project input into Key, Query, Value spaces
-        k = self.key_gen(embedded)   # (B, T, attention_dim)
-        q = self.query_gen(embedded) # (B, T, attention_dim)
-        v = self.value_gen(embedded) # (B, T, attention_dim)
+        K = self.key(embedded)      # (B x T x attention_dim)
+        Q = self.query(embedded)    # (B x T x attention_dim)
+        V = self.value(embedded)    # (B x T x attention_dim)
 
-        # Attention scores: (Q @ K^T) / sqrt(d_k)
-        scores = q @ torch.transpose(k, 1, 2)
-        context_length, attention_dim = k.shape[1], k.shape[2]
-        scores = scores / (attention_dim ** 0.5)
+        # compute attention
+        attention = (Q @ K.mT) / (K.shape[-1] ** 0.5)
 
-        # Causal mask: prevent attending to future tokens
-        lower_triangular = torch.tril(torch.ones(context_length, context_length))
-        mask = lower_triangular == 0
-        scores = scores.masked_fill(mask, float('-inf'))
-        scores = nn.functional.softmax(scores, dim=2)
-
-        return torch.round(scores @ v, decimals=4)
+        # Causal mask, prevent attending to future tokens
+        lower_triang = torch.tril(torch.ones_like(attention))
+        attention[lower_triang == 0] = -float("inf")
+        scores = torch.softmax(attention, dim=2)
+        output = scores @ V
+        return torch.round(output, decimals=4)
